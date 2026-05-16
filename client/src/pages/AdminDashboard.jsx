@@ -85,14 +85,14 @@ const AdminDashboard = () => {
 
     return (
         <div className="max-w-7xl mx-auto">
-            <div className="bg-black text-white rounded-2xl p-6 sm:p-8 mb-8 shadow-lg flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+            <div className="bg-gradient-to-r from-jade-950 via-jade-900 to-jade-950 text-white rounded-2xl p-6 sm:p-8 mb-8 shadow-lg shadow-jade-950/25 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left ring-1 ring-jade-700/40">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Admin Dashboard</h1>
-                    <p className="text-gray-300">Manage events and manually confirm bookings.</p>
+                    <p className="text-jade-200/90">Manage events and manually confirm bookings.</p>
                 </div>
                 <button
                     onClick={() => setShowEventForm(!showEventForm)}
-                    className="w-full md:w-auto bg-white text-black font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition shadow-md"
+                    className="w-full md:w-auto bg-jade-400 text-jade-950 font-bold py-3 px-6 rounded-lg hover:bg-jade-300 transition shadow-md ring-2 ring-transparent hover:ring-jade-300/80"
                 >
                     {showEventForm ? 'Cancel Creation' : '+ Create New Event'}
                 </button>
@@ -100,21 +100,21 @@ const AdminDashboard = () => {
 
             {/* Admin Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-jade-100 flex items-center justify-between">
                     <div>
                         <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Total Revenue</p>
-                        <h3 className="text-3xl font-black text-green-600">₹{bookings.reduce((sum, b) => b.paymentStatus === 'paid' && b.status === 'confirmed' ? sum + b.amount : sum, 0)}</h3>
+                        <h3 className="text-3xl font-black text-jade-600">₹{bookings.reduce((sum, b) => b.paymentStatus === 'paid' && b.status === 'confirmed' ? sum + b.amount : sum, 0)}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-xl font-bold">₹</div>
+                    <div className="w-12 h-12 bg-jade-100 text-jade-600 rounded-full flex items-center justify-center text-xl font-bold">₹</div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-jade-100 flex items-center justify-between">
                     <div>
                         <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Paid Clients</p>
-                        <h3 className="text-3xl font-black text-blue-600">{new Set(bookings.filter(b => b.paymentStatus === 'paid' && b.status === 'confirmed').map(b => b.userId?._id)).size}</h3>
+                        <h3 className="text-3xl font-black text-jade-700">{new Set(bookings.filter(b => b.paymentStatus === 'paid' && b.status === 'confirmed').map(b => b.userId?._id)).size}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-xl font-bold">👤</div>
+                    <div className="w-12 h-12 bg-jade-100 text-jade-600 rounded-full flex items-center justify-center text-xl font-bold">👤</div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-jade-100 flex items-center justify-between">
                     <div>
                         <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Pending Requests</p>
                         <h3 className="text-3xl font-black text-yellow-600">{bookings.filter(b => b.status === 'pending').length}</h3>
@@ -124,22 +124,22 @@ const AdminDashboard = () => {
             </div>
 
             {showEventForm && (
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8 animation-slideDown">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800">Create New Event</h2>
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-jade-100 mb-8 animation-slideDown">
+                    <h2 className="text-2xl font-bold mb-6 text-jade-950">Create New Event</h2>
                     <form onSubmit={handleCreateEvent} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input required type="text" placeholder="Event Title" className="border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                        <input required type="text" placeholder="Category (e.g., Tech, Music)" className="border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} />
-                        <input required type="date" className="border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
-                        <input required type="text" placeholder="Location" className="border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
-                        <input required type="number" placeholder="Total Seats" className="border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.totalSeats} onChange={e => setFormData({ ...formData, totalSeats: e.target.value })} />
-                        <input required type="number" placeholder="Ticket Price (0 for free)" className="border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.ticketPrice} onChange={e => setFormData({ ...formData, ticketPrice: e.target.value })} />
+                        <input required type="text" placeholder="Event Title" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                        <input required type="text" placeholder="Category (e.g., Tech, Music)" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} />
+                        <input required type="date" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                        <input required type="text" placeholder="Location" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
+                        <input required type="number" placeholder="Total Seats" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.totalSeats} onChange={e => setFormData({ ...formData, totalSeats: e.target.value })} />
+                        <input required type="number" placeholder="Ticket Price (0 for free)" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.ticketPrice} onChange={e => setFormData({ ...formData, ticketPrice: e.target.value })} />
 
                         <div className="md:col-span-2">
-                            <input type="text" placeholder="Image URL (Provide any direct link to an image)" className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                            <input type="text" placeholder="Image URL (Provide any direct link to an image)" className="w-full border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
                         </div>
 
-                        <textarea required placeholder="Event Description" className="border px-4 py-3 rounded-lg md:col-span-2 h-32 focus:ring-2 focus:ring-gray-700 outline-none transition" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-                        <button type="submit" className="md:col-span-2 bg-gray-900 text-white font-bold py-3 mt-2 rounded-lg hover:bg-black transition shadow-md">Publish Event</button>
+                        <textarea required placeholder="Event Description" className="border border-jade-200 px-4 py-3 rounded-lg md:col-span-2 h-32 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                        <button type="submit" className="md:col-span-2 bg-gradient-to-r from-jade-600 to-jade-700 text-white font-bold py-3 mt-2 rounded-lg hover:from-jade-700 hover:to-jade-800 transition shadow-md shadow-jade-200/40">Publish Event</button>
                     </form>
                 </div>
             )}
@@ -147,11 +147,11 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Events Section */}
                 <div className="flex flex-col">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 text-sm">{events.length}</span>
+                    <h2 className="text-2xl font-bold mb-6 text-jade-950 flex items-center gap-3">
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-jade-100 text-jade-800 text-sm">{events.length}</span>
                         All Events
                     </h2>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="bg-white rounded-xl shadow-sm border border-jade-100 overflow-hidden">
                         <ul className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
                             {events.length === 0 ? <li className="p-6 text-gray-500 text-center">No events created yet.</li> :
                                 events.map(event => (
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
                                         <div>
                                             <h4 className="font-bold text-gray-900 mb-1 leading-tight">{event.title}</h4>
                                             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                                <span className="flex items-center gap-1 font-medium"><div className="w-2 h-2 rounded-full bg-blue-500"></div> {new Date(event.date).toLocaleDateString()}</span>
+                                                <span className="flex items-center gap-1 font-medium"><div className="w-2 h-2 rounded-full bg-jade-500"></div> {new Date(event.date).toLocaleDateString()}</span>
                                                 <span className="flex items-center gap-1 font-medium"><div className={`w-2 h-2 rounded-full ${event.availableSeats > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div> {event.availableSeats}/{event.totalSeats} seats</span>
                                             </div>
                                         </div>
@@ -175,11 +175,11 @@ const AdminDashboard = () => {
 
                 {/* Bookings Section */}
                 <div className="flex flex-col">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                    <h2 className="text-2xl font-bold mb-6 text-jade-950 flex items-center gap-3">
                         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 text-sm font-bold">{bookings.length}</span>
                         Booking Requests
                     </h2>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="bg-white rounded-xl shadow-sm border border-jade-100 overflow-hidden">
                         <ul className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
                             {bookings.length === 0 ? <li className="p-6 text-gray-500 text-center">No bookings yet.</li> :
                                 bookings.map(booking => (
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
                                             <h4 className="font-bold text-gray-900 text-lg leading-tight">{booking.eventId?.title || 'Deleted Event'}</h4>
                                             <div className="flex flex-col gap-1 items-end shrink-0 ml-4">
                                                 <span className={`px-2 py-1 text-[10px] font-black rounded uppercase tracking-wider ${booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : booking.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{booking.status}</span>
-                                                {booking.status !== 'cancelled' && <span className={`px-2 py-1 text-[10px] font-black rounded uppercase tracking-wider ${booking.paymentStatus === 'paid' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-200 text-gray-800'}`}>{booking.paymentStatus.replace('_', ' ')}</span>}
+                                                {booking.status !== 'cancelled' && <span className={`px-2 py-1 text-[10px] font-black rounded uppercase tracking-wider ${booking.paymentStatus === 'paid' ? 'bg-jade-100 text-jade-800' : 'bg-gray-200 text-gray-800'}`}>{booking.paymentStatus.replace('_', ' ')}</span>}
                                             </div>
                                         </div>
                                         <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100 text-sm">

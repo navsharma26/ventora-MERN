@@ -35,9 +35,9 @@ const Register = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-16 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <div className="max-w-md mx-auto mt-16 bg-white p-8 rounded-xl shadow-lg shadow-jade-200/40 border border-jade-100">
             <div className="text-center mb-8">
-                <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Create an Account</h2>
+                <h2 className="text-3xl font-extrabold text-jade-950 mb-2">Create an Account</h2>
                 <p className="text-gray-500">Join Eventora today</p>
             </div>
 
@@ -51,7 +51,7 @@ const Register = () => {
                             <input
                                 type="text"
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-700 transition shadow-sm"
+                                className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
@@ -61,7 +61,7 @@ const Register = () => {
                             <input
                                 type="email"
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-700 transition shadow-sm"
+                                className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -71,7 +71,7 @@ const Register = () => {
                             <input
                                 type="password"
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-700 transition shadow-sm"
+                                className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -79,7 +79,7 @@ const Register = () => {
                     </>
                 ) : (
                     <div>
-                        <p className="text-sm text-green-700 bg-green-50 p-3 mb-4 rounded border border-green-200">
+                        <p className="text-sm text-jade-800 bg-jade-50 p-3 mb-4 rounded border border-jade-200">
                             An OTP has been sent to your email. Please verify your account.
                         </p>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Verification Code (OTP)</label>
@@ -87,7 +87,7 @@ const Register = () => {
                             type="text"
                             required
                             placeholder="6-digit code"
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-700 transition shadow-sm font-bold tracking-widest text-center text-lg"
+                            className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm font-bold tracking-widest text-center text-lg"
                             value={otp}
                             onChange={(e) => setOtp(e.target.value)}
                             maxLength="6"
@@ -98,7 +98,7 @@ const Register = () => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-black focus:ring-4 focus:ring-gray-200 transition shadow-md mt-4"
+                    className="w-full bg-gradient-to-r from-jade-600 to-jade-700 text-white font-bold py-3 rounded-lg hover:from-jade-700 hover:to-jade-800 focus:ring-4 focus:ring-jade-200 transition shadow-md mt-4"
                 >
                     {loading ? 'Processing...' : (showOTP ? 'Verify & Complete' : 'Sign Up')}
                 </button>
@@ -106,7 +106,7 @@ const Register = () => {
 
             {!showOTP && (
                 <p className="text-center mt-6 text-gray-600">
-                    Already have an account? <Link to="/login" className="text-gray-900 font-bold hover:underline">Sign in</Link>
+                    Already have an account? <Link to="/login" className="text-jade-700 font-bold hover:text-jade-900 hover:underline">Sign in</Link>
                 </p>
             )}
         </div>

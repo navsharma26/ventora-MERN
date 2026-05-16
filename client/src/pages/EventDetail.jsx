@@ -64,11 +64,11 @@ const EventDetail = () => {
     const isSoldOut = event.availableSeats <= 0;
 
     return (
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden mt-8">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl shadow-jade-200/30 overflow-hidden mt-8 ring-1 ring-jade-100">
             {event.image ? (
                 <img src={event.image} alt={event.title} className="w-full h-80 object-cover" />
             ) : (
-                <div className="w-full h-64 bg-gray-900 flex items-center justify-center text-white/50 text-6xl font-black uppercase tracking-widest">
+                <div className="w-full h-64 bg-jade-900 flex items-center justify-center text-jade-200/60 text-6xl font-black uppercase tracking-widest">
                     {event.category}
                 </div>
             )}
@@ -76,29 +76,29 @@ const EventDetail = () => {
             <div className="p-8 md:p-12">
                 <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
                     <div>
-                        <div className="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-3">
+                        <div className="inline-block bg-jade-100 text-jade-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-3">
                             {event.category}
                         </div>
-                        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{event.title}</h1>
+                        <h1 className="text-4xl font-extrabold text-jade-950 mb-4">{event.title}</h1>
                         <p className="text-gray-600 text-lg leading-relaxed mb-6">{event.description}</p>
                     </div>
 
-                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 min-w-[300px] w-full md:w-auto shrink-0 shadow-sm">
-                        <h3 className="text-xl font-bold text-gray-800 mb-6">Booking Details</h3>
+                    <div className="bg-jade-50/80 p-6 rounded-xl border border-jade-100 min-w-[300px] w-full md:w-auto shrink-0 shadow-sm">
+                        <h3 className="text-xl font-bold text-jade-950 mb-6">Booking Details</h3>
 
                         <div className="space-y-4 mb-8">
                             <div className="flex items-center gap-4 text-gray-600">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-900 shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-jade-200 flex items-center justify-center text-jade-900 shrink-0">
                                     <FaMoneyBillWave />
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-400 uppercase">Ticket Price</p>
-                                    <p className="font-bold text-gray-800 text-lg">{event.ticketPrice === 0 ? <span className="text-green-500">Free</span> : `₹${event.ticketPrice}`}</p>
+                                    <p className="font-bold text-gray-800 text-lg">{event.ticketPrice === 0 ? <span className="text-jade-600 font-semibold">Free</span> : `₹${event.ticketPrice}`}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-4 text-gray-600">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-900 shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-jade-200 flex items-center justify-center text-jade-900 shrink-0">
                                     <FaChair />
                                 </div>
                                 <div>
@@ -110,7 +110,7 @@ const EventDetail = () => {
                             </div>
 
                             <div className="flex items-center gap-4 text-gray-600">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-900 shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-jade-200 flex items-center justify-center text-jade-900 shrink-0">
                                     <FaCalendarAlt />
                                 </div>
                                 <div>
@@ -120,7 +120,7 @@ const EventDetail = () => {
                             </div>
 
                             <div className="flex items-center gap-4 text-gray-600">
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-900 shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-jade-200 flex items-center justify-center text-jade-900 shrink-0">
                                     <FaMapMarkerAlt />
                                 </div>
                                 <div>
@@ -132,12 +132,12 @@ const EventDetail = () => {
 
                         {showOTP && (
                             <div className="mb-4">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Enter OTP to Confirm</label>
+                                <label className="block text-sm font-semibold text-jade-900 mb-2">Enter OTP to Confirm</label>
                                 <input
                                     type="text"
                                     required
                                     placeholder="6-digit code"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-gray-700 transition shadow-sm font-bold tracking-widest text-center text-lg"
+                                    className="w-full px-4 py-3 rounded-xl border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm font-bold tracking-widest text-center text-lg"
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                     maxLength="6"
@@ -150,13 +150,13 @@ const EventDetail = () => {
                             disabled={isSoldOut || bookingLoading || (showOTP && !otp)}
                             className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition shadow-lg ${isSoldOut || (successMsg && !showOTP)
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-gray-900 hover:bg-black text-white hover:shadow-xl hover:-translate-y-1'
+                                : 'bg-gradient-to-r from-jade-600 to-jade-700 hover:from-jade-700 hover:to-jade-800 text-white hover:shadow-jade-300/40 hover:-translate-y-1'
                                 }`}
                         >
                             {bookingLoading ? 'Processing...' : (showOTP ? 'Verify OTP & Confirm' : (successMsg && !showOTP ? 'Request Sent' : (isSoldOut ? 'Sold Out' : 'Confirm Registration')))}
                         </button>
                         {error && <p className="text-red-500 mt-4 text-center font-medium bg-red-50 p-2 rounded">{error}</p>}
-                        {successMsg && <p className="text-green-600 mt-4 text-center font-medium bg-green-50 p-2 rounded">{successMsg}</p>}
+                        {successMsg && <p className="text-jade-700 mt-4 text-center font-medium bg-jade-50 border border-jade-100 p-2 rounded">{successMsg}</p>}
                     </div>
                 </div>
             </div>
