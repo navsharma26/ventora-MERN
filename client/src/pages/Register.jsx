@@ -23,8 +23,7 @@ const Register = () => {
             if (!showOTP) {
                 const res = await register(name, email, password);
                 setShowOTP(true);
-                if (res?.otp) setOtp(res.otp);
-                setToast({ message: res?.message || 'Account created! Enter 6-digit OTP code.', type: 'info' });
+                setToast({ message: res?.message || 'Account created! OTP verification code sent to your email.', type: 'info' });
             } else {
                 await verifyOTP(email, otp);
                 navigate('/dashboard');

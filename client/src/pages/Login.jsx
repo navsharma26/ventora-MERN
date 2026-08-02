@@ -31,8 +31,7 @@ const Login = () => {
         } catch (err) {
             if (err.needsVerification) {
                 setShowOTP(true);
-                if (err.otp) setOtp(err.otp);
-                setToast({ message: err.message || 'Account unverified. 6-digit OTP code sent.', type: 'warning' });
+                setToast({ message: err.message || 'Account unverified. OTP verification code sent to your email.', type: 'warning' });
             } else {
                 setToast({ message: err.message || err, type: 'error' });
             }

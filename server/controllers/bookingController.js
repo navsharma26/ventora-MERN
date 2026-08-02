@@ -15,11 +15,8 @@ exports.sendBookingOTP = async (req, res) => {
         await OTP.create({ email: userEmail, otp, action: 'event_booking' });
         await sendOTPEmail(req.user.email, otp, 'event_booking');
 
-        const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
-
         res.json({
-            message: isSmtpConfigured ? 'OTP sent successfully to your email!' : `[2FA Verification Code]: ${otp}`,
-            otp: otp
+            message: 'OTP verification code sent to your registered email! Please check your inbox.'
         });
     } catch (error) {
         res.status(500).json({ message: 'Error sending OTP', error: error.message });

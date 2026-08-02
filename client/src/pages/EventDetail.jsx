@@ -98,8 +98,7 @@ const EventDetail = () => {
                 const { data } = await api.post('/bookings/send-otp');
                 setShowOTP(true);
                 setOtpTimer(300);
-                if (data?.otp) setOtp(data.otp);
-                setToast({ message: data?.message || 'OTP verification code sent!', type: 'info' });
+                setToast({ message: data?.message || 'OTP verification code sent to your registered email! Please check your inbox.', type: 'info' });
             } else {
                 await api.post('/bookings', {
                     eventId: event._id,
@@ -468,7 +467,7 @@ const EventDetail = () => {
                                             onChange={(e) => setOtp(e.target.value)}
                                             maxLength="6"
                                         />
-                                        <p className="text-[11px] text-gray-400 mt-1.5 text-center">Enter 6-digit code shown in toast/email.</p>
+                                        <p className="text-[11px] text-gray-400 mt-1.5 text-center">Enter 6-digit code sent to your registered email inbox.</p>
                                     </div>
                                 </div>
                             )}

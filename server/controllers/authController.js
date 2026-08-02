@@ -35,9 +35,8 @@ exports.register = async (req, res) => {
         const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
         res.status(201).json({
-            message: isSmtpConfigured ? 'OTP code sent to your email! Please enter it below.' : `[2FA Verification Code]: ${otp}`,
-            email: user.email,
-            otp: otp
+            message: 'OTP verification code sent to your registered email! Please check your inbox.',
+            email: user.email
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
@@ -59,12 +58,10 @@ exports.login = async (req, res) => {
             await OTP.create({ email: user.email, otp, action: 'account_verification' });
             await sendOTPEmail(user.email, otp, 'account_verification');
 
-            const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
             return res.status(403).json({
-                message: isSmtpConfigured ? 'Account unverified. 6-digit OTP code sent!' : `Account unverified. [2FA Verification Code]: ${otp}`,
+                message: 'Account unverified. OTP verification code sent to your email!',
                 needsVerification: true,
-                email: user.email,
-                otp: otp
+                email: user.email
             });
         }
 
