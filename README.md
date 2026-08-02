@@ -1,62 +1,80 @@
 # Eventora - World-Class Full-Stack Event Booking & Discovery Platform 🚀
 
-[![Live Frontend](https://img.shields.io/badge/Vercel--Frontend-LIVE-10b981?style=for-the-badge&logo=vercel)](https://eventora-mern-nine.vercel.app)
-[![Live Backend API](https://img.shields.io/badge/Render--Backend-LIVE-059669?style=for-the-badge&logo=render)](https://eventora-backend-q3f8.onrender.com/api/health)
-[![Repository](https://img.shields.io/badge/GitHub-navsharma26%2Fventora--MERN-064e3b?style=for-the-badge&logo=github)](https://github.com/navsharma26/ventora-MERN)
+[![Live Frontend Application](https://img.shields.io/badge/Vercel--Frontend-LIVE%20APP-10b981?style=for-the-badge&logo=vercel)](https://eventora-mern-nine.vercel.app)
+[![Live Backend API Service](https://img.shields.io/badge/Render--Backend-LIVE%20API-059669?style=for-the-badge&logo=render)](https://eventora-backend-q3f8.onrender.com/api/health)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-navsharma26%2Fventora--MERN-064e3b?style=for-the-badge&logo=github)](https://github.com/navsharma26/ventora-MERN)
 
-Eventora is a production-grade MERN platform for browsing, booking, and hosting world-class tech conferences, concerts, and summits. Built with React, Tailwind CSS, Node.js, Express, and MongoDB.
-
----
-
-## ✨ Features Highlight
-
-- 📍 **Real-Time Interactive Maps**: Powered by OpenStreetMap & Leaflet JS with venue coordinates, marker pins, popups, and real-time user GPS tracking.
-- 🎯 **"Near Me" Geolocation Filter**: Instant GPS detection calculating distance (km) to nearby events.
-- 🤖 **AI Smart Place & Event Recommender**: Intelligent recommendation engine matching budget, category, and real-time location with AI rationale explanations.
-- 🧭 **Local Tourist & Event Guide Network**: Connect with verified local guides for venue tours, VIP concierges, and city highlights.
-- ⭐ **Review & Rating System**: 1-5 star ratings, attendee comments, and automatic average rating recalculation.
-- 🎫 **Digital Ticket Pass & Scannable QR**: Instant viewable and printable pass complete with custom verification QR code for confirmed bookings.
-- 🔐 **2FA OTP Authentication**: Cryptographically secure 6-digit OTP verification for user registration and ticket reservations.
-- 👑 **Admin Operations Command Center**: Full CRUD event management (Create, Edit, Delete), booking queue processing (Confirm as Paid/Unpaid, Reject), and live revenue metrics.
-- ⚡ **Atomic Seat Reservation**: Concurrency-safe seat reservation (`$inc` with `$gt: 0`) preventing overbooking under high traffic.
+**Eventora** is a production-grade MERN (MongoDB, Express, React, Node.js) web application designed for discovering, reserving, and managing world-class tech conferences, music concerts, business summits, and cultural festivals.
 
 ---
 
-## 🛠️ Deployment Instructions
+## 🌐 Official Deployed Live Links
 
-### 1. Backend Deployment (Render)
-1. Log into [Render](https://render.com) and click **New > Web Service**.
-2. Connect your GitHub repository: `https://github.com/navsharma26/ventora-MERN`.
-3. Configure the Web Service:
-   - **Root Directory**: `server`
-   - **Build Command**: `npm install`
-   - **Start Command**: `node server.js`
-4. Set Environment Variables in Render:
-   ```env
-   MONGO_URI=your_mongodb_atlas_connection_string
-   JWT_SECRET=supersecretjwtkey_eventora
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   PORT=5000
-   NODE_ENV=production
-   ```
-5. Deploy Web Service and copy your live Render URL (e.g. `https://ventora-mern-backend.onrender.com`).
+* 🌐 **Live Web Application**: **[https://eventora-mern-nine.vercel.app](https://eventora-mern-nine.vercel.app)**
+* 🐙 **GitHub Repository**: **[https://github.com/navsharma26/ventora-MERN](https://github.com/navsharma26/ventora-MERN)**
+* ⚡ **Live REST API Health Endpoint**: **[https://eventora-backend-q3f8.onrender.com/api/health](https://eventora-backend-q3f8.onrender.com/api/health)**
 
 ---
 
-### 2. Frontend Deployment (Vercel)
-1. Log into [Vercel](https://vercel.com) and click **Add New > Project**.
-2. Import repository: `https://github.com/navsharma26/ventora-MERN`.
-3. Configure Build Settings:
-   - **Framework Preset**: Vite
-   - **Root Directory**: `./` (or `client`)
-   - **Build Command**: `npm run build --prefix client`
-   - **Output Directory**: `client/dist`
-4. Set Environment Variables in Vercel:
-   ```env
-   VITE_API_URL=https://your-render-backend-url.onrender.com/api
-   ```
-5. Click **Deploy**.
+## ✨ Features Overview
+
+### 💳 1. Real Scannable UPI Payment Gateway
+- **Dynamic UPI QR Code Generator**: Generates real, high-resolution UPI QR Codes (`upi://pay?pa=...&pn=...&am=...&cu=INR`) for event tickets and guide bookings.
+- **Scan with Any Smartphone App**: Compatible with **Google Pay, PhonePe, Paytm, BHIM, CRED, Amazon Pay**.
+- **1-Tap Mobile UPI Launcher**: Mobile deep-link button that launches installed UPI apps directly.
+- **UTR / Ref Transaction Tracking**: Users enter 12-digit UTR numbers to request verified ticket booking approval.
+- **Printable UPI Payment Receipt**: Instant invoice generator with printable digital transaction passes.
+
+### 🧭 2. Event Manager & Local Tourist Guide Network
+- **Direct Call Button**: Click to initiate phone call (`tel:+919876543210`) with verified concierges.
+- **Direct WhatsApp Chat**: 1-click WhatsApp launcher (`https://wa.me/...`) with pre-filled inquiry text.
+- **Past Client Reviews & Star Ratings**: 1-5 star ratings, reviewer testimonials, and experience badges (`8+ Yrs Exp`, `52+ Events`).
+- **Custom Fee Calculator**: Hourly rate calculator (`₹1,500/hr`) and invoice receipt generator.
+
+### 📍 3. Real-Time Interactive Maps & Geolocation
+- **OpenStreetMap & Leaflet Integration**: Live interactive map pins with popups for venue coordinates and attendee position.
+- **"📍 Events Near Me" GPS Tracking**: Computes real-time Haversine distance (km) from the user's current GPS location.
+
+### 🤖 4. AI Smart Event & Place Recommender
+- **Intelligent Engine**: Ranks events by budget limits, category preferences, and user coordinates.
+- **AI Rationale Statements**: Explains why an event is recommended for the user.
+
+### 🎫 5. Digital Ticket Pass & Scannable QR Modal
+- **Printable Ticket Pass**: Full printable view with event logistics, attendee details, and custom SVG verification QR code.
+
+### 🔐 6. 2FA Security & Concurrency-Safe Booking
+- **Cryptographic 2FA OTP Verification**: 6-digit OTP verification codes for user registration and ticket bookings.
+- **Atomic Seat Reservation**: Prevents overbooking under high concurrency (`Event.findOneAndUpdate({ availableSeats: { $gt: 0 } }, { $inc: { availableSeats: -1 } })`).
+- **Admin Command Center**: Full CRUD controls for creating, editing, and deleting events, approving bookings, and tracking revenue metrics.
+
+---
+
+## 🚀 REST API Endpoints
+
+### Auth Routes (`/api/auth`)
+- `POST /api/auth/register` - User registration & 2FA dispatch
+- `POST /api/auth/login` - User login & JWT issue
+- `POST /api/auth/verify-otp` - Verify 6-digit account OTP
+
+### Event Routes (`/api/events`)
+- `GET /api/events` - Fetch all events
+- `GET /api/events/:id` - Fetch single event details
+- `POST /api/events` - Create event (Admin)
+- `PUT /api/events/:id` - Update event (Admin)
+- `DELETE /api/events/:id` - Delete event (Admin)
+
+### Booking Routes (`/api/bookings`)
+- `POST /api/bookings/send-otp` - Dispatch booking OTP code
+- `POST /api/bookings` - Submit ticket booking request with UTR ref
+- `GET /api/bookings/my-bookings` - Fetch user ticket history
+- `GET /api/bookings/admin/all` - Fetch all bookings (Admin)
+- `PUT /api/bookings/:id/status` - Update booking approval status (Admin)
+
+### Guide & AI Routes (`/api/guides`, `/api/ai`, `/api/reviews`)
+- `GET /api/guides?city=...` - Fetch local guides & concierges
+- `POST /api/ai/recommend` - AI event recommendation engine
+- `POST /api/reviews` - Submit event attendee review
+- `GET /api/reviews/event/:eventId` - Fetch event reviews feed
 
 ---
 
@@ -71,27 +89,28 @@ cd ventora-MERN
 npm install
 npm run install:all
 
-# Seed Database with Map Coordinates, Guides & Reviews
+# Seed MongoDB Atlas Database
 npm run seed --prefix server
 
-# Run Frontend and Backend Concurrently
+# Run Application (Frontend + Backend Concurrently)
 npm run dev
 ```
 
 ---
 
-## 📁 Environment Variables Template
+## ⚙️ Environment Variables Setup
 
-### Backend (`server/.env`):
+### Server (`server/.env`):
 ```env
-MONGO_URI=mongodb://localhost:27017/eventora
+MONGO_URI=mongodb+srv://navneet30405_db_user:1981@cluster0.1lbk3m1.mongodb.net/eventora?retryWrites=true&w=majority
 JWT_SECRET=supersecretjwtkey_eventora
 EMAIL_USER=your_gmail_address@gmail.com
 EMAIL_PASS=your_gmail_app_password
 PORT=5000
+NODE_ENV=production
 ```
 
-### Frontend (`client/.env`):
+### Client (`client/.env`):
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://eventora-backend-q3f8.onrender.com/api
 ```
