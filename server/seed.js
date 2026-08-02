@@ -102,46 +102,88 @@ const events = [
 
 const dummyGuides = [
     {
-        name: 'Elena Rostova',
-        title: 'Licensed City & Culture Concierge',
-        bio: 'Over 8 years guiding travelers through historical downtowns, VIP event passes, and secret culinary spots.',
+        name: 'Rajesh Sharma',
+        title: 'Senior Event Manager & City Tour Escort',
+        bio: 'Over 8+ years experience managing high-profile tech conferences, musical nights, and corporate delegations with VIP hospitality.',
         city: 'San Francisco',
-        languages: ['English', 'Spanish', 'French'],
+        languages: ['English', 'Hindi', 'Spanish'],
         rating: 4.9,
-        hourlyRate: 80,
-        contactEmail: 'elena.guide@eventora.com',
-        phone: '+1 (555) 234-5678',
+        totalReviews: 28,
+        hourlyRate: 1500,
+        contactEmail: 'rajesh.sharma@eventora.com',
+        phone: '+91 98765 43210',
+        whatsapp: '919876543210',
+        upiId: 'rajesh.sharma@okicici',
         image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
-        specialties: ['Tech Hubs', 'Nightlife', 'Museums'],
-        experienceYears: 8
+        specialties: ['Tech Summits', 'VIP Transport', 'Stage Setup', 'Security Escort'],
+        experienceYears: 8,
+        completedEventsCount: 52,
+        reviews: [
+            {
+                clientName: 'Ananya Verma',
+                rating: 5,
+                comment: 'Rajesh handled our 3-day tech conference flawlessly! Excellent coordination and VIP venue access.',
+                date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
+            },
+            {
+                clientName: 'David Miller',
+                rating: 5,
+                comment: 'Very professional event manager. His local network in the city saved us time and money!',
+                date: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000)
+            }
+        ]
     },
     {
-        name: 'Marcus Vance',
-        title: 'VIP Event & Music Festival Specialist',
-        bio: 'Professional concert escort and backstage coordinator with insider access to top music venues and festivals.',
+        name: 'Priya Malhotra',
+        title: 'VIP Event Producer & Concert Concierge',
+        bio: 'Professional event director specializing in backstage management, sound logistics, and luxury guest hospitality.',
         city: 'New York',
-        languages: ['English', 'German'],
+        languages: ['English', 'Hindi', 'German'],
         rating: 5.0,
-        hourlyRate: 120,
-        contactEmail: 'marcus.vance@eventora.com',
-        phone: '+1 (555) 876-5432',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
-        specialties: ['EDM Festivals', 'VIP Transport', 'Clubs'],
-        experienceYears: 10
+        totalReviews: 34,
+        hourlyRate: 2000,
+        contactEmail: 'priya.events@eventora.com',
+        phone: '+91 98112 87654',
+        whatsapp: '919811287654',
+        upiId: 'priya.organizer@upi',
+        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
+        specialties: ['Music Festivals', 'Backstage VIP', 'Catering Logistics'],
+        experienceYears: 10,
+        completedEventsCount: 78,
+        reviews: [
+            {
+                clientName: 'Rohan Mehta',
+                rating: 5,
+                comment: 'Priya is the best event manager for live concerts! Every detail was spot on.',
+                date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+            }
+        ]
     },
     {
-        name: 'Aisha Patel',
-        title: 'Executive Summit & Tech Tour Guide',
-        bio: 'Specializing in corporate delegations, business summits, and local tech ecosystem introductions.',
+        name: 'Amit Patel',
+        title: 'Corporate Summit & Protocol Lead',
+        bio: 'Specializing in corporate delegations, business summits, and local tech ecosystem introductions with protocol management.',
         city: 'London',
         languages: ['English', 'Hindi', 'Mandarin'],
         rating: 4.8,
-        hourlyRate: 95,
-        contactEmail: 'aisha.patel@eventora.com',
-        phone: '+44 20 7946 0912',
-        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
-        specialties: ['Business Delegations', 'Fine Dining', 'City Landmark Tours'],
-        experienceYears: 6
+        totalReviews: 19,
+        hourlyRate: 1800,
+        contactEmail: 'amit.patel@eventora.com',
+        phone: '+91 99554 11223',
+        whatsapp: '919955411223',
+        upiId: 'amit.vip@ybl',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
+        specialties: ['Corporate Delegations', 'Protocol Access', 'Luxury Transport'],
+        experienceYears: 7,
+        completedEventsCount: 41,
+        reviews: [
+            {
+                clientName: 'Sarah Jenkins',
+                rating: 5,
+                comment: 'Seamless corporate tour and summit coordination. Highly recommended!',
+                date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000)
+            }
+        ]
     }
 ];
 
