@@ -13,7 +13,7 @@ const generateToken = (id, role) => {
 
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password } = req.body;
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ message: 'User already exists' });
 
@@ -24,20 +24,17 @@ exports.register = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            role: 'user', // Hardcoded to prevent frontend passing role
-            isVerified: false
+            role: 'user',
+            isVerified: true // Instant access
         });
 
-        const otp = generateOTP();
-        await OTP.create({ email, otp, action: 'account_verification' });
-        await sendOTPEmail(email, otp, 'account_verification');
-
-        const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
-
         res.status(201).json({
-            message: isSmtpConfigured ? 'OTP sent to email. Please verify.' : `[Demo Mode] OTP Code: ${otp}`,
+            _id: user.id,
+            name: user.name,
             email: user.email,
-            demoOtp: isSmtpConfigured ? undefined : otp
+            role: user.role,
+            token: generateToken(user.id, user.role),
+            message: 'Registration successful!'
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
@@ -53,18 +50,10 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-        if (!user.isVerified && user.role !== 'admin') {
-            const otp = generateOTP();
-            await OTP.findOneAndDelete({ email: user.email, action: 'account_verification' });
-            await OTP.create({ email: user.email, otp, action: 'account_verification' });
-            await sendOTPEmail(user.email, otp, 'account_verification');
-            const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
-            return res.status(403).json({
-                message: isSmtpConfigured ? 'Account not verified. OTP sent to email.' : `Account not verified. [Demo Mode] OTP Code: ${otp}`,
-                needsVerification: true,
-                email: user.email,
-                demoOtp: isSmtpConfigured ? undefined : otp
-            });
+        // Instant login without OTP barrier
+        if (!user.isVerified) {
+            user.isVerified = true;
+            await user.save();
         }
 
         res.json({

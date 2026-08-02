@@ -28,10 +28,13 @@ exports.bookEvent = async (req, res) => {
     try {
         const { eventId, otp } = req.body;
 
-        // Verify OTP explicitly before proceeding
-        const validOTP = await OTP.findOne({ email: req.user.email, otp, action: 'event_booking' });
-        if (!validOTP) {
-            return res.status(400).json({ message: 'Invalid or expired OTP for booking' });
+        // If OTP is passed, verify it; otherwise allow direct demo booking
+        if (otp) {
+            const validOTP = await OTP.findOne({ email: req.user.email, otp, action: 'event_booking' });
+            if (!validOTP) {
+                return res.status(400).json({ message: 'Invalid or expired OTP' });
+            }
+            await OTP.deleteOne({ _id: validOTP._id });
         }
 
         const event = await Event.findById(eventId);

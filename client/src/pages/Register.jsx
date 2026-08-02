@@ -20,19 +20,8 @@ const Register = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            if (!showOTP) {
-                const res = await register(name, email, password);
-                setShowOTP(true);
-                if (res?.demoOtp) {
-                    setOtp(res.demoOtp);
-                    setToast({ message: `[Demo Mode] OTP Auto-Filled: ${res.demoOtp}`, type: 'success' });
-                } else {
-                    setToast({ message: res?.message || 'OTP sent to your email. Please verify.', type: 'info' });
-                }
-            } else {
-                await verifyOTP(email, otp);
-                navigate('/dashboard');
-            }
+            await register(name, email, password);
+            navigate('/dashboard');
         } catch (err) {
             setToast({ message: typeof err === 'string' ? err : err.message || 'Registration failed', type: 'error' });
         } finally {
