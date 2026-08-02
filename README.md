@@ -1,5 +1,7 @@
 # Eventora - World-Class Full-Stack Event Booking & Discovery Platform 🚀
 
+[![Live Frontend](https://img.shields.io/badge/Vercel--Frontend-LIVE-10b981?style=for-the-badge&logo=vercel)](https://eventora-mern-nine.vercel.app)
+[![Live Backend API](https://img.shields.io/badge/Render--Backend-LIVE-059669?style=for-the-badge&logo=render)](https://eventora-backend-q3f8.onrender.com/api/health)
 [![Repository](https://img.shields.io/badge/GitHub-navsharma26%2Fventora--MERN-064e3b?style=for-the-badge&logo=github)](https://github.com/navsharma26/ventora-MERN)
 
 Eventora is a production-grade MERN platform for browsing, booking, and hosting world-class tech conferences, concerts, and summits. Built with React, Tailwind CSS, Node.js, Express, and MongoDB.
