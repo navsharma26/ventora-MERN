@@ -275,27 +275,45 @@ const GuideConnectModal = ({ guide, onClose }) => {
                                         <span className="text-2xl font-black font-display text-emerald-400">₹{totalFee}</span>
                                     </div>
 
-                                    {/* UPI Details Box */}
-                                    <div className="bg-jade-50 p-4 rounded-2xl border border-jade-200 text-center space-y-3">
-                                        <p className="text-xs font-bold text-jade-900 uppercase tracking-wider">UPI Payment Details</p>
-
-                                        {/* QR Code SVG Mock */}
-                                        <div className="w-28 h-28 bg-white p-2 rounded-xl mx-auto border border-jade-300 shadow-sm flex items-center justify-center">
-                                            <FaQrcode className="text-6xl text-jade-950" />
+                                    {/* Real Scannable UPI Details Box */}
+                                    <div className="bg-gradient-to-b from-jade-50 to-white p-5 rounded-2xl border border-jade-200 text-center space-y-4 shadow-sm">
+                                        <div className="flex items-center justify-center gap-2 text-jade-950 font-bold text-xs">
+                                            <FaQrcode className="text-jade-600 text-base" />
+                                            <span className="uppercase tracking-wider">Real Scannable UPI QR Code</span>
                                         </div>
 
-                                        <div className="flex items-center justify-center gap-2 bg-white px-4 py-2 rounded-xl border border-jade-300 max-w-xs mx-auto">
+                                        {/* Dynamic Scannable UPI QR Image */}
+                                        <div className="bg-white p-3 rounded-2xl inline-block border-2 border-jade-400 shadow-md">
+                                            <img
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=${encodeURIComponent(guide.name)}&am=${totalFee}&cu=INR&tn=Eventora%20Guide%20Booking`)}`}
+                                                alt="Scan UPI QR Code to Pay"
+                                                className="w-44 h-44 rounded-lg object-contain mx-auto"
+                                            />
+                                            <p className="text-[10px] font-extrabold text-jade-900 mt-2">
+                                                Scan with GPay • PhonePe • Paytm • BHIM
+                                            </p>
+                                        </div>
+
+                                        {/* 1-Tap UPI Mobile App Launcher */}
+                                        <a
+                                            href={`upi://pay?pa=${upiId}&pn=${encodeURIComponent(guide.name)}&am=${totalFee}&cu=INR&tn=Eventora%20Guide%20Booking`}
+                                            className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition"
+                                        >
+                                            🚀 Pay ₹{totalFee} Directly via UPI App (GPay / PhonePe)
+                                        </a>
+
+                                        {/* Copy UPI ID */}
+                                        <div className="flex items-center justify-center gap-2 bg-white px-4 py-2.5 rounded-xl border border-jade-300 max-w-xs mx-auto">
                                             <span className="font-mono text-xs font-extrabold text-jade-950">{upiId}</span>
                                             <button
                                                 type="button"
                                                 onClick={handleCopyUpi}
-                                                className="text-jade-700 hover:text-jade-950 font-bold text-xs"
+                                                className="text-jade-700 hover:text-jade-950 font-bold text-xs flex items-center gap-1 bg-jade-50 px-2 py-1 rounded-md border border-jade-200"
                                                 title="Copy UPI ID"
                                             >
-                                                <FaCopy />
+                                                <FaCopy /> {copiedUpi ? 'Copied!' : 'Copy'}
                                             </button>
                                         </div>
-                                        {copiedUpi && <p className="text-[10px] font-bold text-emerald-600">✓ UPI ID Copied to clipboard!</p>}
                                     </div>
 
                                     {/* Enter Transaction UTR */}
