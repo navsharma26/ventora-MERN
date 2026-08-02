@@ -28,7 +28,7 @@ exports.sendBookingOTP = async (req, res) => {
 
 exports.bookEvent = async (req, res) => {
     try {
-        const { eventId, otp } = req.body;
+        const { eventId, otp, utrNumber, paymentMethod } = req.body;
         const userEmail = req.user.email.toLowerCase().trim();
         const inputOtp = String(otp || '').trim();
 
@@ -58,7 +58,9 @@ exports.bookEvent = async (req, res) => {
             eventId,
             status: 'pending',
             paymentStatus: 'not_paid',
-            amount: event.ticketPrice
+            amount: event.ticketPrice,
+            utrNumber: utrNumber || null,
+            paymentMethod: paymentMethod || (event.ticketPrice > 0 ? 'UPI' : 'Free')
         });
 
         await OTP.deleteOne({ _id: validOTP._id }); // cleanup

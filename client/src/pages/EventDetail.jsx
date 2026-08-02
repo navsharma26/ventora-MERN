@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import Toast from '../components/Toast';
 import InteractiveMap from '../components/InteractiveMap';
 import GuideConnectModal from '../components/GuideConnectModal';
-import { FaCalendarAlt, FaMapMarkerAlt, FaChair, FaMoneyBillWave, FaShieldAlt, FaArrowLeft, FaCheckCircle, FaStar, FaUserCheck, FaCommentAlt, FaPaperPlane } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaChair, FaMoneyBillWave, FaShieldAlt, FaArrowLeft, FaCheckCircle, FaStar, FaUserCheck, FaCommentAlt, FaPaperPlane, FaQrcode, FaCopy, FaMobileAlt } from 'react-icons/fa';
 
 const EventDetail = () => {
     const { id } = useParams();
@@ -16,6 +16,8 @@ const EventDetail = () => {
     const [loading, setLoading] = useState(true);
     const [bookingLoading, setBookingLoading] = useState(false);
     const [otp, setOtp] = useState('');
+    const [utrNumber, setUtrNumber] = useState('');
+    const [copiedUpi, setCopiedUpi] = useState(false);
     const [showOTP, setShowOTP] = useState(false);
     const [otpTimer, setOtpTimer] = useState(300);
     const [toast, setToast] = useState({ message: '', type: 'info' });
@@ -99,10 +101,15 @@ const EventDetail = () => {
                 if (data?.otp) setOtp(data.otp);
                 setToast({ message: data?.message || 'OTP verification code sent!', type: 'info' });
             } else {
-                await api.post('/bookings', { eventId: event._id, otp });
+                await api.post('/bookings', {
+                    eventId: event._id,
+                    otp,
+                    utrNumber,
+                    paymentMethod: event.ticketPrice > 0 ? 'UPI' : 'Free'
+                });
                 setIsBooked(true);
                 setShowOTP(false);
-                setToast({ message: 'Booking request submitted! Pending admin approval.', type: 'success' });
+                setToast({ message: 'Booking request & payment submitted! Pending admin approval.', type: 'success' });
             }
         } catch (err) {
             setToast({ message: err.response?.data?.message || 'Booking request failed', type: 'error' });
@@ -384,23 +391,85 @@ const EventDetail = () => {
                                 </div>
                             </div>
 
-                            {/* OTP Form Block */}
+                            {/* OTP & UPI Payment Form Block */}
                             {showOTP && (
-                                <div className="mb-6 bg-white p-4 rounded-xl border border-jade-200 shadow-sm animate-fadeIn">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <label className="text-xs font-extrabold text-jade-950 uppercase">6-Digit OTP Code</label>
-                                        <span className="text-xs font-mono font-bold text-amber-600">{formatTimer(otpTimer)}</span>
+                                <div className="mb-6 bg-white p-4 sm:p-5 rounded-2xl border border-jade-200 shadow-md space-y-4 animate-fadeIn">
+                                    {/* If Paid Event, show Real UPI QR Code & UTR input */}
+                                    {event.ticketPrice > 0 && (
+                                        <div className="bg-gradient-to-b from-jade-50 to-white p-4 rounded-xl border border-jade-200 text-center space-y-3">
+                                            <div className="flex items-center justify-center gap-1.5 text-jade-950 font-bold text-xs">
+                                                <FaQrcode className="text-jade-600 text-base" />
+                                                <span className="uppercase tracking-wider">UPI Payment Gateway</span>
+                                            </div>
+
+                                            {/* Real Scannable UPI QR Image */}
+                                            <div className="bg-white p-2.5 rounded-xl inline-block border-2 border-jade-400 shadow-sm">
+                                                <img
+                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`upi://pay?pa=eventora.tickets@okicici&pn=Eventora%20Tickets&am=${event.ticketPrice}&cu=INR`)}`}
+                                                    alt="Scan UPI QR Code to Pay"
+                                                    className="w-36 h-36 rounded-lg object-contain mx-auto"
+                                                />
+                                                <p className="text-[10px] font-extrabold text-jade-900 mt-1">
+                                                    Scan to pay ₹{event.ticketPrice} via GPay / PhonePe
+                                                </p>
+                                            </div>
+
+                                            {/* 1-Tap Mobile UPI App Launcher */}
+                                            <a
+                                                href={`upi://pay?pa=eventora.tickets@okicici&pn=Eventora%20Tickets&am=${event.ticketPrice}&cu=INR`}
+                                                className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition"
+                                            >
+                                                <FaMobileAlt /> Pay ₹{event.ticketPrice} via UPI App
+                                            </a>
+
+                                            {/* Copy UPI ID */}
+                                            <div className="flex items-center justify-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-jade-300 max-w-xs mx-auto">
+                                                <span className="font-mono text-[11px] font-extrabold text-jade-950">eventora.tickets@okicici</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText('eventora.tickets@okicici');
+                                                        setCopiedUpi(true);
+                                                        setTimeout(() => setCopiedUpi(false), 2000);
+                                                    }}
+                                                    className="text-jade-700 hover:text-jade-950 font-bold text-[11px] flex items-center gap-1 bg-jade-50 px-2 py-0.5 rounded border border-jade-200"
+                                                >
+                                                    <FaCopy /> {copiedUpi ? 'Copied!' : 'Copy'}
+                                                </button>
+                                            </div>
+
+                                            {/* UTR Input */}
+                                            <div className="text-left pt-2 border-t border-jade-200">
+                                                <label className="block text-[11px] font-extrabold text-jade-950 uppercase mb-1">Enter UPI Transaction / UTR Ref No.</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="e.g. 329182910291"
+                                                    className="w-full px-3 py-2 rounded-lg border border-jade-300 text-xs font-mono font-bold focus:ring-2 focus:ring-jade-500"
+                                                    value={utrNumber}
+                                                    onChange={(e) => setUtrNumber(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 6-Digit OTP Code Section */}
+                                    <div>
+                                        <div className="flex justify-between items-center mb-1.5">
+                                            <label className="text-xs font-extrabold text-jade-950 uppercase">6-Digit OTP Code</label>
+                                            <span className="text-xs font-mono font-bold text-amber-600">{formatTimer(otpTimer)}</span>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="123456"
+                                            className="w-full px-4 py-3 rounded-lg border border-jade-300 focus:ring-2 focus:ring-jade-500 font-mono tracking-widest text-center text-xl font-extrabold"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value)}
+                                            maxLength="6"
+                                        />
+                                        <p className="text-[11px] text-gray-400 mt-1.5 text-center">Enter 6-digit code shown in toast/email.</p>
                                     </div>
-                                    <input
-                                        type="text"
-                                        required
-                                        placeholder="123456"
-                                        className="w-full px-4 py-3 rounded-lg border border-jade-300 focus:ring-2 focus:ring-jade-500 font-mono tracking-widest text-center text-xl font-extrabold"
-                                        value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
-                                        maxLength="6"
-                                    />
-                                    <p className="text-[11px] text-gray-400 mt-2 text-center">Enter code sent to registered email.</p>
                                 </div>
                             )}
 
