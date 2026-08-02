@@ -1,83 +1,95 @@
-# Eventora - Full-Stack Event Booking Platform
+# Eventora - World-Class Full-Stack Event Booking & Discovery Platform 🚀
 
-Eventora is a full-stack MERN application that allows users to seamlessly browse, register, and pay natively without any third party tools. It features an administrative dashboard for event organizers to create and manage free and paid events. All bookings can be managed manually by an admin to handle payments directly.
+[![Repository](https://img.shields.io/badge/GitHub-navsharma26%2Fventora--MERN-064e3b?style=for-the-badge&logo=github)](https://github.com/navsharma26/ventora-MERN)
 
-## Features
-- **User Authentication**: Secure login & registration with JWT and bcrypt.
-- **2FA OTP Verification**: 
-  - Mandatory Email OTP to activate your account upon Registration (or delayed login attempts).
-  - Mandatory Email OTP to finalize and secure event ticket booking.
-- **Role-Based Access**: 
-  - **Admin**: Create, edit, and delete events. Confirm and reject all incoming booking requests, mark them as 'Paid' or 'Not Paid'. Access is strictly locked to database-flagged users only.
-  - **User**: Browse events, submit ticket booking requests via OTP, view personal dashboard pending status, and cancel bookings.
-- **Event Management**: Create free and paid events with detailed descriptions, external image URLs, dates, categories, and seating capacity.
-- **Smart Booking System**:
-  - Mandatory 2FA OTP to authorize a booking request.
-  - All booking requests (both free and paid) enter a secure 'Pending' queue for Admin verification.
-  - Seat availability accurately updates and securely validates against overbooking logic.
-- **Admin Analytics Dashboard**: Track live data such as Pending Requests, Total Revenue, and Total Confirmed Paid Clients directly from the admin panel.
-- **Email Notifications**: Automated email delivery upon successful booking confirmation using Nodemailer.
-- **Sleek UI/UX**: Built entirely with React, Tailwind CSS, and polished with micro-interactions.
+Eventora is a production-grade MERN platform for browsing, booking, and hosting world-class tech conferences, concerts, and summits. Built with React, Tailwind CSS, Node.js, Express, and MongoDB.
 
 ---
 
-## 🚀 Setup Instructions
+## ✨ Features Highlight
 
-### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
-You will also need a MongoDB database (e.g., [MongoDB Atlas Free Tier](https://www.mongodb.com/cloud/atlas/register)).
+- 📍 **Real-Time Interactive Maps**: Powered by OpenStreetMap & Leaflet JS with venue coordinates, marker pins, popups, and real-time user GPS tracking.
+- 🎯 **"Near Me" Geolocation Filter**: Instant GPS detection calculating distance (km) to nearby events.
+- 🤖 **AI Smart Place & Event Recommender**: Intelligent recommendation engine matching budget, category, and real-time location with AI rationale explanations.
+- 🧭 **Local Tourist & Event Guide Network**: Connect with verified local guides for venue tours, VIP concierges, and city highlights.
+- ⭐ **Review & Rating System**: 1-5 star ratings, attendee comments, and automatic average rating recalculation.
+- 🎫 **Digital Ticket Pass & Scannable QR**: Instant viewable and printable pass complete with custom verification QR code for confirmed bookings.
+- 🔐 **2FA OTP Authentication**: Cryptographically secure 6-digit OTP verification for user registration and ticket reservations.
+- 👑 **Admin Operations Command Center**: Full CRUD event management (Create, Edit, Delete), booking queue processing (Confirm as Paid/Unpaid, Reject), and live revenue metrics.
+- ⚡ **Atomic Seat Reservation**: Concurrency-safe seat reservation (`$inc` with `$gt: 0`) preventing overbooking under high traffic.
 
-### 1. Environment Variables Configuration
-Navigate to `server/.env` and fill in the necessary keys:
+---
+
+## 🛠️ Deployment Instructions
+
+### 1. Backend Deployment (Render)
+1. Log into [Render](https://render.com) and click **New > Web Service**.
+2. Connect your GitHub repository: `https://github.com/navsharma26/ventora-MERN`.
+3. Configure the Web Service:
+   - **Root Directory**: `server`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+4. Set Environment Variables in Render:
+   ```env
+   MONGO_URI=your_mongodb_atlas_connection_string
+   JWT_SECRET=supersecretjwtkey_eventora
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
+   PORT=5000
+   NODE_ENV=production
+   ```
+5. Deploy Web Service and copy your live Render URL (e.g. `https://ventora-mern-backend.onrender.com`).
+
+---
+
+### 2. Frontend Deployment (Vercel)
+1. Log into [Vercel](https://vercel.com) and click **Add New > Project**.
+2. Import repository: `https://github.com/navsharma26/ventora-MERN`.
+3. Configure Build Settings:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `./` (or `client`)
+   - **Build Command**: `npm run build --prefix client`
+   - **Output Directory**: `client/dist`
+4. Set Environment Variables in Vercel:
+   ```env
+   VITE_API_URL=https://your-render-backend-url.onrender.com/api
+   ```
+5. Click **Deploy**.
+
+---
+
+## 💻 Local Development Setup
+
+```bash
+# Clone Repository
+git clone https://github.com/navsharma26/ventora-MERN.git
+cd ventora-MERN
+
+# Install All Dependencies
+npm install
+npm run install:all
+
+# Seed Database with Map Coordinates, Guides & Reviews
+npm run seed --prefix server
+
+# Run Frontend and Backend Concurrently
+npm run dev
+```
+
+---
+
+## 📁 Environment Variables Template
+
+### Backend (`server/.env`):
 ```env
-MONGO_URI=your_mongodb_connection_string
+MONGO_URI=mongodb://localhost:27017/eventora
 JWT_SECRET=supersecretjwtkey_eventora
-EMAIL_USER=your_gmail_address
+EMAIL_USER=your_gmail_address@gmail.com
 EMAIL_PASS=your_gmail_app_password
 PORT=5000
 ```
-> **Note**: For `EMAIL_PASS`, you need to generate an "App Password" from your Google Account settings, standard passwords won't work due to 2FA.
 
-### 2. Run from Outer Folder (Single Terminal)
-You can now manage both backend and frontend from the project root:
-
-```bash
-# from Eventora root
-npm install
-npm run install:all
-npm run dev
+### Frontend (`client/.env`):
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
-
-- `npm run dev` starts both `server` and `client` together using `concurrently`.
-- `npm run dev:all` installs dependencies (server + client) and starts both in one command.
-- `npm run start` runs backend `start` + frontend `preview` together.
-
-### 3. Install Dependencies
-Open two separate terminals for the backend and frontend.
-
-**Backend Terminal:**
-```bash
-cd server
-npm install --legacy-peer-deps
-```
-
-**Frontend Terminal:**
-```bash
-cd client
-npm install
-```
-
-### 4. Run the Application Local Servers
-**Run Backend:**
-```bash
-cd server
-npm run dev
-```
-*(Server will run on `http://localhost:5000`)*
-
-**Run Frontend:**
-```bash
-cd client
-npm run dev
-```
-*(Client will run on a local port provided by Vite, typically `http://localhost:5173`)*

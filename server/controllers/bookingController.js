@@ -1,9 +1,10 @@
+const crypto = require('crypto');
 const Booking = require('../models/Booking');
 const Event = require('../models/Event');
 const OTP = require('../models/OTP');
 const { sendBookingEmail, sendOTPEmail } = require('../utils/email');
 
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+const generateOTP = () => crypto.randomInt(100000, 1000000).toString();
 
 exports.sendBookingOTP = async (req, res) => {
     try {
@@ -60,8 +61,14 @@ exports.confirmBooking = async (req, res) => {
 
         if (booking.status === 'confirmed') return res.status(400).json({ message: 'Booking is already confirmed' });
 
-        const event = await Event.findById(booking.eventId._id);
-        if (event.availableSeats <= 0) {
+        // Atomic seat deduction to handle race conditions
+        const updatedEvent = await Event.findOneAndUpdate(
+            { _id: booking.eventId._id, availableSeats: { $gt: 0 } },
+            { $inc: { availableSeats: -1 } },
+            { new: true }
+        );
+
+        if (!updatedEvent) {
             return res.status(400).json({ message: 'No seats available to confirm this booking' });
         }
 
@@ -70,9 +77,6 @@ exports.confirmBooking = async (req, res) => {
             booking.paymentStatus = paymentStatus;
         }
         await booking.save();
-
-        event.availableSeats -= 1;
-        await event.save();
 
         // Send email on admin confirmation
         await sendBookingEmail(booking.userId.email, booking.userId.name, booking.eventId.title);

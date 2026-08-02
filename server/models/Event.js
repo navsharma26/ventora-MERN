@@ -10,6 +10,12 @@ const eventSchema = new mongoose.Schema({
     availableSeats: { type: Number, required: true },
     image: { type: String },
     ticketPrice: { type: Number, required: true, default: 0 },
+    coordinates: {
+        lat: { type: Number, default: 37.7749 },
+        lng: { type: Number, default: -122.4194 }
+    },
+    averageRating: { type: Number, default: 4.5 },
+    totalReviews: { type: Number, default: 0 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

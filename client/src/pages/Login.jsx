@@ -1,14 +1,16 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import Toast from '../components/Toast';
+import { FaTicketAlt, FaLock, FaEnvelope, FaKey } from 'react-icons/fa';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
     const [showOTP, setShowOTP] = useState(false);
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState({ message: '', type: 'info' });
 
     const { login, verifyOTP } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -16,7 +18,6 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
         try {
             if (!showOTP) {
                 const data = await login(email, password);
@@ -30,9 +31,9 @@ const Login = () => {
         } catch (err) {
             if (err.needsVerification) {
                 setShowOTP(true);
-                setError('Account not verified. A new OTP has been sent to your email.');
+                setToast({ message: 'Account unverified. A 6-digit OTP code has been dispatched.', type: 'warning' });
             } else {
-                setError(err.message || err);
+                setToast({ message: err.message || err, type: 'error' });
             }
         } finally {
             setLoading(false);
@@ -40,64 +41,82 @@ const Login = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-20 bg-white p-8 rounded-xl shadow-lg shadow-jade-200/40 border border-jade-100">
-            <div className="text-center mb-8">
-                <h2 className="text-3xl font-extrabold text-jade-950 mb-2">Welcome Back</h2>
-                <p className="text-gray-500">Sign in to your Eventora account</p>
-            </div>
+        <div className="max-w-md mx-auto my-12 animate-fadeIn">
+            <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'info' })} />
 
-            {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-center shadow-inner border border-red-100">{error}</div>}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {!showOTP ? (
-                    <>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                            <input
-                                type="email"
-                                required
-                                className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                            <input
-                                type="password"
-                                required
-                                className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Verification Code (OTP)</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="6-digit code"
-                            className="w-full px-4 py-3 rounded-lg border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 transition shadow-sm font-bold tracking-widest text-center text-lg"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            maxLength="6"
-                        />
+            <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-jade-200/40 border border-jade-100 ring-1 ring-jade-100">
+                <div className="text-center mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-tr from-jade-500 to-emerald-400 text-jade-950 rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-4 shadow-lg shadow-jade-400/20">
+                        <FaTicketAlt />
                     </div>
-                )}
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-jade-600 to-jade-700 text-white font-bold py-3 rounded-lg hover:from-jade-700 hover:to-jade-800 focus:ring-4 focus:ring-jade-200 transition shadow-md"
-                >
-                    {loading ? 'Processing...' : (showOTP ? 'Verify OTP & Log In' : 'Sign In')}
-                </button>
-            </form>
+                    <h2 className="text-3xl font-black font-display text-jade-950 mb-2">Welcome Back</h2>
+                    <p className="text-gray-500 text-sm">Sign in to manage your bookings and passes</p>
+                </div>
 
-            <p className="text-center mt-8 text-gray-600">
-                Don't have an account? <Link to="/register" className="text-jade-700 font-bold hover:text-jade-900 hover:underline">Sign up</Link>
-            </p>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {!showOTP ? (
+                        <>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Email Address</label>
+                                <div className="relative flex items-center">
+                                    <FaEnvelope className="absolute left-4 text-jade-600" />
+                                    <input
+                                        type="email"
+                                        required
+                                        placeholder="you@example.com"
+                                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 text-sm transition font-medium"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Password</label>
+                                <div className="relative flex items-center">
+                                    <FaLock className="absolute left-4 text-jade-600" />
+                                    <input
+                                        type="password"
+                                        required
+                                        placeholder="••••••••"
+                                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-jade-200 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 text-sm transition font-medium"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div>
+                            <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Verification Code (OTP)</label>
+                            <div className="relative flex items-center">
+                                <FaKey className="absolute left-4 text-jade-600" />
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="6-digit OTP code"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-jade-200 focus:ring-2 focus:ring-jade-500 font-mono tracking-widest text-center text-lg font-bold"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    maxLength="6"
+                                />
+                            </div>
+                            <p className="text-[11px] text-gray-400 mt-2 text-center">Check your inbox or dev console for the code.</p>
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-jade-600 to-jade-700 hover:from-jade-700 hover:to-jade-800 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-jade-600/20 text-sm mt-2"
+                    >
+                        {loading ? 'Authenticating...' : (showOTP ? 'Verify OTP & Continue' : 'Sign In')}
+                    </button>
+                </form>
+
+                <p className="text-center mt-8 text-xs text-gray-500">
+                    Don't have an account? <Link to="/register" className="text-jade-700 font-bold hover:text-jade-950 hover:underline">Create Account</Link>
+                </p>
+            </div>
         </div>
     );
 };

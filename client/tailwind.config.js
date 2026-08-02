@@ -6,6 +6,10 @@ export default {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                display: ['"Outfit"', 'sans-serif'],
+            },
             colors: {
                 jade: {
                     50: '#ecfdf8',
@@ -21,6 +25,20 @@ export default {
                     950: '#022c22',
                 },
             },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0', transform: 'translateY(8px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                popIn: {
+                    '0%': { opacity: '0', transform: 'scale(0.95)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
+                }
+            },
+            animation: {
+                fadeIn: 'fadeIn 0.25s ease-out forwards',
+                popIn: 'popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            }
         },
     },
     plugins: [],

@@ -2,18 +2,28 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
+import Toast from '../components/Toast';
+import { FaPlus, FaEdit, FaTrash, FaCheck, FaTimes, FaRupeeSign, FaUsers, FaClock, FaCalendarAlt, FaFilter, FaExclamationTriangle } from 'react-icons/fa';
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+
     const [events, setEvents] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [bookingFilter, setBookingFilter] = useState('all'); // 'all', 'pending', 'confirmed', 'cancelled'
 
-    const [showEventForm, setShowEventForm] = useState(false);
+    // Form Modal State
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [editingEventId, setEditingEventId] = useState(null);
     const [formData, setFormData] = useState({
         title: '', description: '', date: '', location: '', category: '', totalSeats: '', ticketPrice: '', image: ''
     });
+
+    // Confirmation modal state
+    const [deleteEventId, setDeleteEventId] = useState(null);
+    const [toast, setToast] = useState({ message: '', type: 'info' });
 
     useEffect(() => {
         if (!user || user.role !== 'admin') {
@@ -27,213 +37,367 @@ const AdminDashboard = () => {
         try {
             const [eventsRes, bookingsRes] = await Promise.all([
                 api.get('/events'),
-                api.get('/bookings/my') // Admin gets all bookings
+                api.get('/bookings/my')
             ]);
             setEvents(eventsRes.data);
             setBookings(bookingsRes.data);
         } catch (error) {
-            console.error('Error fetching admin data', error);
+            setToast({ message: 'Error loading admin data', type: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCreateEvent = async (e) => {
+    const handleOpenCreateModal = () => {
+        setEditingEventId(null);
+        setFormData({ title: '', description: '', date: '', location: '', category: '', totalSeats: '', ticketPrice: '', image: '' });
+        setShowEventModal(true);
+    };
+
+    const handleOpenEditModal = (event) => {
+        setEditingEventId(event._id);
+        const formattedDate = event.date ? new Date(event.date).toISOString().split('T')[0] : '';
+        setFormData({
+            title: event.title || '',
+            description: event.description || '',
+            date: formattedDate,
+            location: event.location || '',
+            category: event.category || '',
+            totalSeats: event.totalSeats || '',
+            ticketPrice: event.ticketPrice || 0,
+            image: event.image || ''
+        });
+        setShowEventModal(true);
+    };
+
+    const handleSaveEvent = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/events', formData);
-            setShowEventForm(false);
-            setFormData({ title: '', description: '', date: '', location: '', category: '', totalSeats: '', ticketPrice: '', image: '' });
+            if (editingEventId) {
+                await api.put(`/events/${editingEventId}`, formData);
+                setToast({ message: 'Event updated successfully!', type: 'success' });
+            } else {
+                await api.post('/events', formData);
+                setToast({ message: 'New event published successfully!', type: 'success' });
+            }
+            setShowEventModal(false);
             fetchData();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error creating event');
+            setToast({ message: error.response?.data?.message || 'Error saving event', type: 'error' });
         }
     };
 
-    const handleDeleteEvent = async (id) => {
-        if (window.confirm('Are you sure you want to delete this event?')) {
-            try {
-                await api.delete(`/events/${id}`);
-                fetchData();
-            } catch (error) {
-                alert('Error deleting event');
-            }
+    const handleConfirmDeleteEvent = async () => {
+        if (!deleteEventId) return;
+        try {
+            await api.delete(`/events/${deleteEventId}`);
+            setToast({ message: 'Event deleted successfully', type: 'info' });
+            setDeleteEventId(null);
+            fetchData();
+        } catch (error) {
+            setToast({ message: 'Error deleting event', type: 'error' });
         }
     };
 
     const handleConfirmBooking = async (id, paymentStatus) => {
         try {
             await api.put(`/bookings/${id}/confirm`, { paymentStatus });
+            setToast({ message: 'Booking confirmed!', type: 'success' });
             fetchData();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error confirming booking');
+            setToast({ message: error.response?.data?.message || 'Error confirming booking', type: 'error' });
         }
     };
 
     const handleCancelBooking = async (id) => {
-        if (window.confirm('Cancel this user\'s booking request?')) {
-            try {
-                await api.delete(`/bookings/${id}`);
-                fetchData();
-            } catch (error) {
-                alert(error.response?.data?.message || 'Error cancelling booking');
-            }
+        try {
+            await api.delete(`/bookings/${id}`);
+            setToast({ message: 'Booking request rejected/cancelled', type: 'info' });
+            fetchData();
+        } catch (error) {
+            setToast({ message: error.response?.data?.message || 'Error updating booking status', type: 'error' });
         }
     };
 
-    if (loading) return <div className="text-center py-20 text-xl font-semibold">Loading admin panel...</div>;
+    if (loading) {
+        return (
+            <div className="max-w-7xl mx-auto py-20 text-center">
+                <div className="w-14 h-14 border-4 border-jade-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-jade-950 font-bold text-lg">Loading Admin Operations...</p>
+            </div>
+        );
+    }
+
+    const totalRevenue = bookings.reduce((sum, b) => b.paymentStatus === 'paid' && b.status === 'confirmed' ? sum + b.amount : sum, 0);
+    const paidClientsCount = new Set(bookings.filter(b => b.paymentStatus === 'paid' && b.status === 'confirmed').map(b => b.userId?._id)).size;
+    const pendingCount = bookings.filter(b => b.status === 'pending').length;
+
+    const filteredBookings = bookings.filter(b => {
+        if (bookingFilter === 'all') return true;
+        return b.status === bookingFilter;
+    });
 
     return (
-        <div className="max-w-7xl mx-auto">
-            <div className="bg-gradient-to-r from-jade-950 via-jade-900 to-jade-950 text-white rounded-2xl p-6 sm:p-8 mb-8 shadow-lg shadow-jade-950/25 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left ring-1 ring-jade-700/40">
+        <div className="max-w-7xl mx-auto pb-16">
+            <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'info' })} />
+
+            {/* Header Banner */}
+            <div className="bg-gradient-to-r from-jade-950 via-jade-900 to-jade-950 text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-xl border border-jade-800 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Admin Dashboard</h1>
-                    <p className="text-jade-200/90">Manage events and manually confirm bookings.</p>
+                    <span className="bg-jade-500/20 text-jade-300 border border-jade-400/30 text-xs font-bold px-3.5 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">
+                        Organizer Operations Control
+                    </span>
+                    <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight text-white mb-2">
+                        Admin Command Center
+                    </h1>
+                    <p className="text-jade-200/80 text-sm font-light">
+                        Create events, edit details, and process user ticket confirmation requests.
+                    </p>
                 </div>
                 <button
-                    onClick={() => setShowEventForm(!showEventForm)}
-                    className="w-full md:w-auto bg-jade-400 text-jade-950 font-bold py-3 px-6 rounded-lg hover:bg-jade-300 transition shadow-md ring-2 ring-transparent hover:ring-jade-300/80"
+                    onClick={handleOpenCreateModal}
+                    className="w-full md:w-auto bg-gradient-to-r from-jade-400 to-emerald-400 text-jade-950 font-bold py-3.5 px-6 rounded-2xl hover:from-jade-300 hover:to-emerald-300 transition shadow-lg shadow-jade-400/20 flex items-center justify-center gap-2 text-sm shrink-0"
                 >
-                    {showEventForm ? 'Cancel Creation' : '+ Create New Event'}
+                    <FaPlus /> Create New Event
                 </button>
             </div>
 
-            {/* Admin Stats Row */}
+            {/* Admin Metrics Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-jade-100 flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Total Revenue</p>
-                        <h3 className="text-3xl font-black text-jade-600">₹{bookings.reduce((sum, b) => b.paymentStatus === 'paid' && b.status === 'confirmed' ? sum + b.amount : sum, 0)}</h3>
+                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Total Confirmed Revenue</p>
+                        <h3 className="text-3xl font-black text-jade-950 font-display">₹{totalRevenue}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-jade-100 text-jade-600 rounded-full flex items-center justify-center text-xl font-bold">₹</div>
+                    <div className="w-12 h-12 bg-jade-100 text-jade-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                        <FaRupeeSign />
+                    </div>
                 </div>
+
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-jade-100 flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Paid Clients</p>
-                        <h3 className="text-3xl font-black text-jade-700">{new Set(bookings.filter(b => b.paymentStatus === 'paid' && b.status === 'confirmed').map(b => b.userId?._id)).size}</h3>
+                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Confirmed Paid Attendees</p>
+                        <h3 className="text-3xl font-black text-jade-700 font-display">{paidClientsCount}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-jade-100 text-jade-600 rounded-full flex items-center justify-center text-xl font-bold">👤</div>
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                        <FaUsers />
+                    </div>
                 </div>
+
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-jade-100 flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Pending Requests</p>
-                        <h3 className="text-3xl font-black text-yellow-600">{bookings.filter(b => b.status === 'pending').length}</h3>
+                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Pending Approval Queue</p>
+                        <h3 className="text-3xl font-black text-amber-600 font-display">{pendingCount}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl font-bold">⏳</div>
+                    <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl font-bold">
+                        <FaClock />
+                    </div>
                 </div>
             </div>
 
-            {showEventForm && (
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-jade-100 mb-8 animation-slideDown">
-                    <h2 className="text-2xl font-bold mb-6 text-jade-950">Create New Event</h2>
-                    <form onSubmit={handleCreateEvent} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input required type="text" placeholder="Event Title" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                        <input required type="text" placeholder="Category (e.g., Tech, Music)" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} />
-                        <input required type="date" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
-                        <input required type="text" placeholder="Location" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
-                        <input required type="number" placeholder="Total Seats" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.totalSeats} onChange={e => setFormData({ ...formData, totalSeats: e.target.value })} />
-                        <input required type="number" placeholder="Ticket Price (0 for free)" className="border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.ticketPrice} onChange={e => setFormData({ ...formData, ticketPrice: e.target.value })} />
-
-                        <div className="md:col-span-2">
-                            <input type="text" placeholder="Image URL (Provide any direct link to an image)" className="w-full border border-jade-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
-                        </div>
-
-                        <textarea required placeholder="Event Description" className="border border-jade-200 px-4 py-3 rounded-lg md:col-span-2 h-32 focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none transition" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-                        <button type="submit" className="md:col-span-2 bg-gradient-to-r from-jade-600 to-jade-700 text-white font-bold py-3 mt-2 rounded-lg hover:from-jade-700 hover:to-jade-800 transition shadow-md shadow-jade-200/40">Publish Event</button>
-                    </form>
-                </div>
-            )}
-
+            {/* Split Content: Events & Booking Requests */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Events Section */}
                 <div className="flex flex-col">
-                    <h2 className="text-2xl font-bold mb-6 text-jade-950 flex items-center gap-3">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-jade-100 text-jade-800 text-sm">{events.length}</span>
-                        All Events
-                    </h2>
-                    <div className="bg-white rounded-xl shadow-sm border border-jade-100 overflow-hidden">
-                        <ul className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-                            {events.length === 0 ? <li className="p-6 text-gray-500 text-center">No events created yet.</li> :
+                    <div className="flex justify-between items-center mb-4 px-1">
+                        <h2 className="text-xl font-black font-display text-jade-950 flex items-center gap-2">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-jade-900 text-jade-300 text-xs">{events.length}</span>
+                            Active Hosted Events
+                        </h2>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-jade-100 overflow-hidden">
+                        <ul className="divide-y divide-gray-100 max-h-[650px] overflow-y-auto">
+                            {events.length === 0 ? (
+                                <li className="p-8 text-gray-400 text-center text-sm">No events created yet.</li>
+                            ) : (
                                 events.map(event => (
-                                    <li key={event._id} className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 transition border-b border-gray-100 last:border-0">
-                                        <div>
-                                            <h4 className="font-bold text-gray-900 mb-1 leading-tight">{event.title}</h4>
-                                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                                <span className="flex items-center gap-1 font-medium"><div className="w-2 h-2 rounded-full bg-jade-500"></div> {new Date(event.date).toLocaleDateString()}</span>
-                                                <span className="flex items-center gap-1 font-medium"><div className={`w-2 h-2 rounded-full ${event.availableSeats > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div> {event.availableSeats}/{event.totalSeats} seats</span>
+                                    <li key={event._id} className="p-5 hover:bg-jade-50/50 transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div className="flex-grow">
+                                            <h4 className="font-bold text-jade-950 text-base leading-snug mb-1">{event.title}</h4>
+                                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                                                <span className="flex items-center gap-1"><FaCalendarAlt className="text-jade-600" /> {new Date(event.date).toLocaleDateString()}</span>
+                                                <span className="bg-jade-100 text-jade-800 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">{event.category}</span>
+                                                <span className="font-bold text-gray-700">{event.availableSeats}/{event.totalSeats} seats left</span>
                                             </div>
                                         </div>
-                                        <button onClick={() => handleDeleteEvent(event._id)} className="w-full sm:w-auto text-red-500 hover:text-white hover:bg-red-500 border border-red-200 px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm shrink-0">
-                                            Delete
-                                        </button>
+
+                                        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                                            <button
+                                                onClick={() => handleOpenEditModal(event)}
+                                                className="flex-1 sm:flex-none p-2.5 text-jade-700 hover:bg-jade-100 border border-jade-200 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1"
+                                                title="Edit Event"
+                                            >
+                                                <FaEdit /> Edit
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteEventId(event._id)}
+                                                className="flex-1 sm:flex-none p-2.5 text-red-600 hover:bg-red-50 border border-red-200 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1"
+                                                title="Delete Event"
+                                            >
+                                                <FaTrash /> Delete
+                                            </button>
+                                        </div>
                                     </li>
                                 ))
-                            }
+                            )}
                         </ul>
                     </div>
                 </div>
 
-                {/* Bookings Section */}
+                {/* Booking Requests Section */}
                 <div className="flex flex-col">
-                    <h2 className="text-2xl font-bold mb-6 text-jade-950 flex items-center gap-3">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 text-sm font-bold">{bookings.length}</span>
-                        Booking Requests
-                    </h2>
-                    <div className="bg-white rounded-xl shadow-sm border border-jade-100 overflow-hidden">
-                        <ul className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-                            {bookings.length === 0 ? <li className="p-6 text-gray-500 text-center">No bookings yet.</li> :
-                                bookings.map(booking => (
-                                    <li key={booking._id} className={`p-6 hover:bg-gray-50 transition border-l-4 ${booking.status === 'pending' ? 'border-l-yellow-400' : booking.status === 'confirmed' ? 'border-l-green-400' : 'border-l-red-400'}`}>
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h4 className="font-bold text-gray-900 text-lg leading-tight">{booking.eventId?.title || 'Deleted Event'}</h4>
-                                            <div className="flex flex-col gap-1 items-end shrink-0 ml-4">
-                                                <span className={`px-2 py-1 text-[10px] font-black rounded uppercase tracking-wider ${booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : booking.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{booking.status}</span>
-                                                {booking.status !== 'cancelled' && <span className={`px-2 py-1 text-[10px] font-black rounded uppercase tracking-wider ${booking.paymentStatus === 'paid' ? 'bg-jade-100 text-jade-800' : 'bg-gray-200 text-gray-800'}`}>{booking.paymentStatus.replace('_', ' ')}</span>}
-                                            </div>
-                                        </div>
-                                        <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100 text-sm">
-                                            <p className="text-gray-700 flex items-center gap-2 mb-1">
-                                                <span className="font-bold w-16 text-gray-500 uppercase text-xs">User:</span>
-                                                <span className="font-semibold">{booking.userId?.name}</span>
-                                                <span className="text-gray-400">({booking.userId?.email})</span>
-                                            </p>
-                                            <p className="text-gray-700 flex items-center gap-2 mb-1">
-                                                <span className="font-bold w-16 text-gray-500 uppercase text-xs">Amount:</span>
-                                                <span className={`font-semibold ${booking.amount === 0 ? 'text-green-600' : ''}`}>{booking.amount === 0 ? 'Free' : `₹${booking.amount}`}</span>
-                                            </p>
-                                            <p className="text-gray-700 flex items-center gap-2 mb-1">
-                                                <span className="font-bold w-16 text-gray-500 uppercase text-xs">Date:</span>
-                                                <span>{new Date(booking.bookedAt).toLocaleString()}</span>
-                                            </p>
-                                            {booking.eventId && (
-                                                <p className="text-gray-700 flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
-                                                    <span className="font-bold w-16 text-gray-500 uppercase text-xs">Seats:</span>
-                                                    <span className={`font-bold ${booking.eventId.availableSeats > 0 ? 'text-green-600' : 'text-red-500'}`}>{booking.eventId.availableSeats}</span> remaining of {booking.eventId.totalSeats}
-                                                </p>
-                                            )}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 px-1">
+                        <h2 className="text-xl font-black font-display text-jade-950 flex items-center gap-2">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs font-extrabold">{filteredBookings.length}</span>
+                            Booking Requests Queue
+                        </h2>
+
+                        {/* Filter Toggle */}
+                        <div className="flex items-center gap-1 bg-jade-50 p-1 rounded-xl border border-jade-100 text-xs font-bold">
+                            <FaFilter className="text-jade-600 ml-2 mr-1 text-xs" />
+                            <button onClick={() => setBookingFilter('all')} className={`px-2.5 py-1 rounded-lg transition ${bookingFilter === 'all' ? 'bg-jade-900 text-white' : 'text-gray-500'}`}>All</button>
+                            <button onClick={() => setBookingFilter('pending')} className={`px-2.5 py-1 rounded-lg transition ${bookingFilter === 'pending' ? 'bg-amber-600 text-white' : 'text-gray-500'}`}>Pending</button>
+                            <button onClick={() => setBookingFilter('confirmed')} className={`px-2.5 py-1 rounded-lg transition ${bookingFilter === 'confirmed' ? 'bg-green-600 text-white' : 'text-gray-500'}`}>Confirmed</button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-jade-100 overflow-hidden">
+                        <ul className="divide-y divide-gray-100 max-h-[650px] overflow-y-auto">
+                            {filteredBookings.length === 0 ? (
+                                <li className="p-8 text-gray-400 text-center text-sm">No booking requests found for selected filter.</li>
+                            ) : (
+                                filteredBookings.map(booking => (
+                                    <li key={booking._id} className="p-5 hover:bg-gray-50/80 transition">
+                                        <div className="flex justify-between items-start mb-2 gap-2">
+                                            <h4 className="font-bold text-jade-950 text-base leading-snug">{booking.eventId?.title || 'Deleted Event'}</h4>
+                                            <span className={`px-2.5 py-0.5 text-[10px] font-black rounded-full uppercase tracking-wider shrink-0 ${
+                                                booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                                booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+                                            }`}>
+                                                {booking.status}
+                                            </span>
                                         </div>
 
-                                        {/* Action buttons for admin */}
+                                        <div className="bg-jade-50/50 rounded-xl p-3 mb-3 border border-jade-100/60 text-xs space-y-1">
+                                            <p className="text-gray-700">
+                                                <strong className="text-gray-500 uppercase text-[10px] mr-2">User:</strong>
+                                                <span className="font-bold text-gray-800">{booking.userId?.name}</span> ({booking.userId?.email})
+                                            </p>
+                                            <p className="text-gray-700">
+                                                <strong className="text-gray-500 uppercase text-[10px] mr-2">Price:</strong>
+                                                <span className="font-bold text-jade-800">{booking.amount === 0 ? 'Free' : `₹${booking.amount}`}</span>
+                                            </p>
+                                        </div>
+
                                         {booking.status === 'pending' && (
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                <button onClick={() => handleConfirmBooking(booking._id, 'paid')} className="flex-1 min-w-[120px] bg-green-50 text-green-700 hover:bg-green-600 hover:text-white border border-green-200 text-xs font-bold py-2.5 px-3 rounded-lg shadow-sm transition">
-                                                    ✓ Approve as Paid
+                                            <div className="flex flex-wrap gap-2">
+                                                <button
+                                                    onClick={() => handleConfirmBooking(booking._id, 'paid')}
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-3 rounded-xl transition shadow-sm flex items-center justify-center gap-1"
+                                                >
+                                                    <FaCheck /> Confirm (Paid)
                                                 </button>
-                                                <button onClick={() => handleConfirmBooking(booking._id, 'not_paid')} className="flex-1 min-w-[120px] bg-gray-50 text-gray-700 hover:bg-gray-800 hover:text-white border border-gray-200 text-xs font-bold py-2.5 px-3 rounded-lg shadow-sm transition">
-                                                    ✓ Approve Undecided
+                                                <button
+                                                    onClick={() => handleConfirmBooking(booking._id, 'not_paid')}
+                                                    className="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1"
+                                                >
+                                                    <FaCheck /> Confirm (Unpaid)
                                                 </button>
-                                                <button onClick={() => handleCancelBooking(booking._id)} className="w-[80px] bg-red-50 text-red-600 hover:bg-red-500 hover:text-white border border-red-200 text-xs font-bold py-2.5 px-3 rounded-lg transition">
-                                                    ✕ Reject
+                                                <button
+                                                    onClick={() => handleCancelBooking(booking._id)}
+                                                    className="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1"
+                                                >
+                                                    <FaTimes /> Reject
                                                 </button>
                                             </div>
                                         )}
                                     </li>
                                 ))
-                            }
+                            )}
                         </ul>
                     </div>
                 </div>
             </div>
+
+            {/* Create / Edit Event Modal */}
+            {showEventModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-jade-950/70 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-jade-100 max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-2xl font-black font-display text-jade-950 mb-6">
+                            {editingEventId ? 'Edit Event Details' : 'Create New Event'}
+                        </h2>
+
+                        <form onSubmit={handleSaveEvent} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Event Title</label>
+                                <input required type="text" placeholder="e.g. AI Innovation Summit" className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+                                <input required type="text" placeholder="Technology, Music, etc." className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
+                                <input required type="date" className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Location</label>
+                                <input required type="text" placeholder="Convention Center, CA" className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Total Capacity</label>
+                                <input required type="number" placeholder="200" className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.totalSeats} onChange={e => setFormData({ ...formData, totalSeats: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ticket Price (₹)</label>
+                                <input required type="number" placeholder="0 for Free" className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.ticketPrice} onChange={e => setFormData({ ...formData, ticketPrice: e.target.value })} />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
+                                <input type="text" placeholder="https://images.unsplash.com/..." className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-jade-500 outline-none" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Event Description</label>
+                                <textarea required placeholder="Detailed event highlights and agenda..." className="w-full border border-jade-200 px-4 py-2.5 rounded-xl text-sm h-28 focus:ring-2 focus:ring-jade-500 outline-none" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                            </div>
+
+                            <div className="sm:col-span-2 flex justify-end gap-3 pt-3">
+                                <button type="button" onClick={() => setShowEventModal(false)} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-100 transition">Cancel</button>
+                                <button type="submit" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-jade-600 to-jade-700 hover:from-jade-700 hover:to-jade-800 text-white font-bold text-sm shadow-md transition">
+                                    {editingEventId ? 'Save Changes' : 'Publish Event'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Confirm Delete Modal */}
+            {deleteEventId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-jade-950/70 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-jade-100 text-center">
+                        <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                            <FaExclamationTriangle />
+                        </div>
+                        <h3 className="text-xl font-extrabold text-jade-950 mb-2">Delete Event?</h3>
+                        <p className="text-gray-500 text-sm mb-6">
+                            Are you sure you want to permanently delete this event? This action will affect associated user bookings.
+                        </p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setDeleteEventId(null)} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-700 text-sm hover:bg-gray-100 transition">Cancel</button>
+                            <button onClick={handleConfirmDeleteEvent} className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow-md transition">Confirm Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
