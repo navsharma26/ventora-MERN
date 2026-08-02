@@ -20,8 +20,15 @@ const Register = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await register(name, email, password);
-            navigate('/dashboard');
+            if (!showOTP) {
+                const res = await register(name, email, password);
+                setShowOTP(true);
+                if (res?.otp) setOtp(res.otp);
+                setToast({ message: res?.message || 'Account created! Enter 6-digit OTP code.', type: 'info' });
+            } else {
+                await verifyOTP(email, otp);
+                navigate('/dashboard');
+            }
         } catch (err) {
             setToast({ message: typeof err === 'string' ? err : err.message || 'Registration failed', type: 'error' });
         } finally {

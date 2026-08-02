@@ -92,9 +92,18 @@ const EventDetail = () => {
         setBookingLoading(true);
 
         try {
-            await api.post('/bookings', { eventId: event._id });
-            setIsBooked(true);
-            setToast({ message: 'Booking request submitted! Pending admin approval.', type: 'success' });
+            if (!showOTP) {
+                const { data } = await api.post('/bookings/send-otp');
+                setShowOTP(true);
+                setOtpTimer(300);
+                if (data?.otp) setOtp(data.otp);
+                setToast({ message: data?.message || 'OTP verification code sent!', type: 'info' });
+            } else {
+                await api.post('/bookings', { eventId: event._id, otp });
+                setIsBooked(true);
+                setShowOTP(false);
+                setToast({ message: 'Booking request submitted! Pending admin approval.', type: 'success' });
+            }
         } catch (err) {
             setToast({ message: err.response?.data?.message || 'Booking request failed', type: 'error' });
         } finally {

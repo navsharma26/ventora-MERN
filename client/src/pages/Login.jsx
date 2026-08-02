@@ -31,12 +31,8 @@ const Login = () => {
         } catch (err) {
             if (err.needsVerification) {
                 setShowOTP(true);
-                if (err.demoOtp) {
-                    setOtp(err.demoOtp);
-                    setToast({ message: `[Demo Mode] Account unverified. OTP: ${err.demoOtp}`, type: 'warning' });
-                } else {
-                    setToast({ message: 'Account unverified. A 6-digit OTP code has been dispatched.', type: 'warning' });
-                }
+                if (err.otp) setOtp(err.otp);
+                setToast({ message: err.message || 'Account unverified. 6-digit OTP code sent.', type: 'warning' });
             } else {
                 setToast({ message: err.message || err, type: 'error' });
             }

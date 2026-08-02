@@ -16,8 +16,8 @@ exports.sendBookingOTP = async (req, res) => {
         const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
         res.json({
-            message: isSmtpConfigured ? 'OTP sent successfully to email' : `[Demo Mode] OTP Code: ${otp}`,
-            demoOtp: isSmtpConfigured ? undefined : otp
+            message: isSmtpConfigured ? 'OTP sent successfully to your email!' : `[2FA Verification Code]: ${otp}`,
+            otp: otp
         });
     } catch (error) {
         res.status(500).json({ message: 'Error sending OTP', error: error.message });
@@ -28,14 +28,12 @@ exports.bookEvent = async (req, res) => {
     try {
         const { eventId, otp } = req.body;
 
-        // If OTP is passed, verify it; otherwise allow direct demo booking
-        if (otp) {
-            const validOTP = await OTP.findOne({ email: req.user.email, otp, action: 'event_booking' });
-            if (!validOTP) {
-                return res.status(400).json({ message: 'Invalid or expired OTP' });
-            }
-            await OTP.deleteOne({ _id: validOTP._id });
+        // Require 2FA OTP verification
+        const validOTP = await OTP.findOne({ email: req.user.email, otp, action: 'event_booking' });
+        if (!validOTP) {
+            return res.status(400).json({ message: 'Invalid or expired OTP verification code' });
         }
+        await OTP.deleteOne({ _id: validOTP._id });
 
         const event = await Event.findById(eventId);
         if (!event) return res.status(404).json({ message: 'Event not found' });

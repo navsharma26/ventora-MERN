@@ -25,16 +25,19 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             role: 'user',
-            isVerified: true // Instant access
+            isVerified: false
         });
 
+        const otp = generateOTP();
+        await OTP.create({ email, otp, action: 'account_verification' });
+        await sendOTPEmail(email, otp, 'account_verification');
+
+        const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+
         res.status(201).json({
-            _id: user.id,
-            name: user.name,
+            message: isSmtpConfigured ? 'OTP code sent to your email! Please enter it below.' : `[2FA Verification Code]: ${otp}`,
             email: user.email,
-            role: user.role,
-            token: generateToken(user.id, user.role),
-            message: 'Registration successful!'
+            otp: otp
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
@@ -50,10 +53,19 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-        // Instant login without OTP barrier
-        if (!user.isVerified) {
-            user.isVerified = true;
-            await user.save();
+        if (!user.isVerified && user.role !== 'admin') {
+            const otp = generateOTP();
+            await OTP.findOneAndDelete({ email: user.email, action: 'account_verification' });
+            await OTP.create({ email: user.email, otp, action: 'account_verification' });
+            await sendOTPEmail(user.email, otp, 'account_verification');
+
+            const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+            return res.status(403).json({
+                message: isSmtpConfigured ? 'Account unverified. 6-digit OTP code sent!' : `Account unverified. [2FA Verification Code]: ${otp}`,
+                needsVerification: true,
+                email: user.email,
+                otp: otp
+            });
         }
 
         res.json({
@@ -74,11 +86,11 @@ exports.verifyOTP = async (req, res) => {
         const validOTP = await OTP.findOne({ email, otp, action: 'account_verification' });
 
         if (!validOTP) {
-            return res.status(400).json({ message: 'Invalid or expired OTP' });
+            return res.status(400).json({ message: 'Invalid or expired OTP code' });
         }
 
         const user = await User.findOneAndUpdate({ email }, { isVerified: true }, { new: true });
-        await OTP.deleteOne({ _id: validOTP._id }); // Delete OTP after usage
+        await OTP.deleteOne({ _id: validOTP._id });
 
         res.json({
             _id: user.id,
