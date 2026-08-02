@@ -82,15 +82,25 @@ exports.login = async (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
     try {
-        const { email, otp } = req.body;
-        const validOTP = await OTP.findOne({ email, otp, action: 'account_verification' });
+        const email = String(req.body.email || '').toLowerCase().trim();
+        const inputOtp = String(req.body.otp || '').trim();
+
+        const validOTP = await OTP.findOne({
+            email: new RegExp(`^${email}$`, 'i'),
+            otp: inputOtp,
+            action: 'account_verification'
+        });
 
         if (!validOTP) {
             return res.status(400).json({ message: 'Invalid or expired OTP code' });
         }
 
-        const user = await User.findOneAndUpdate({ email }, { isVerified: true }, { new: true });
-        await OTP.deleteOne({ _id: validOTP._id });
+        const user = await User.findOneAndUpdate(
+            { email: new RegExp(`^${email}$`, 'i') },
+            { isVerified: true },
+            { new: true }
+        );
+        await OTP.deleteMany({ email: new RegExp(`^${email}$`, 'i'), action: 'account_verification' });
 
         res.json({
             _id: user.id,

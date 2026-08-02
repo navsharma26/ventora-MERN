@@ -8,9 +8,11 @@ const generateOTP = () => crypto.randomInt(100000, 1000000).toString();
 
 exports.sendBookingOTP = async (req, res) => {
     try {
+        const userEmail = req.user.email.toLowerCase().trim();
         const otp = generateOTP();
-        await OTP.findOneAndDelete({ email: req.user.email, action: 'event_booking' });
-        await OTP.create({ email: req.user.email, otp, action: 'event_booking' });
+
+        await OTP.deleteMany({ email: userEmail, action: 'event_booking' });
+        await OTP.create({ email: userEmail, otp, action: 'event_booking' });
         await sendOTPEmail(req.user.email, otp, 'event_booking');
 
         const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
@@ -27,13 +29,20 @@ exports.sendBookingOTP = async (req, res) => {
 exports.bookEvent = async (req, res) => {
     try {
         const { eventId, otp } = req.body;
+        const userEmail = req.user.email.toLowerCase().trim();
+        const inputOtp = String(otp || '').trim();
 
         // Require 2FA OTP verification
-        const validOTP = await OTP.findOne({ email: req.user.email, otp, action: 'event_booking' });
+        const validOTP = await OTP.findOne({
+            email: new RegExp(`^${userEmail}$`, 'i'),
+            otp: inputOtp,
+            action: 'event_booking'
+        });
+
         if (!validOTP) {
             return res.status(400).json({ message: 'Invalid or expired OTP verification code' });
         }
-        await OTP.deleteOne({ _id: validOTP._id });
+        await OTP.deleteMany({ email: userEmail, action: 'event_booking' });
 
         const event = await Event.findById(eventId);
         if (!event) return res.status(404).json({ message: 'Event not found' });
