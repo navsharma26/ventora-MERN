@@ -93,10 +93,15 @@ const EventDetail = () => {
 
         try {
             if (!showOTP) {
-                await api.post('/bookings/send-otp');
+                const { data } = await api.post('/bookings/send-otp');
                 setShowOTP(true);
                 setOtpTimer(300);
-                setToast({ message: 'OTP sent to your email!', type: 'info' });
+                if (data?.demoOtp) {
+                    setOtp(data.demoOtp);
+                    setToast({ message: `[Demo Mode] Booking OTP Auto-Filled: ${data.demoOtp}`, type: 'success' });
+                } else {
+                    setToast({ message: 'OTP sent to your email!', type: 'info' });
+                }
             } else {
                 await api.post('/bookings', { eventId: event._id, otp });
                 setIsBooked(true);

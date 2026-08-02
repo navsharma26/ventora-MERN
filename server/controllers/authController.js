@@ -32,9 +32,12 @@ exports.register = async (req, res) => {
         await OTP.create({ email, otp, action: 'account_verification' });
         await sendOTPEmail(email, otp, 'account_verification');
 
+        const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+
         res.status(201).json({
-            message: 'OTP sent to email. Please verify.',
-            email: user.email
+            message: isSmtpConfigured ? 'OTP sent to email. Please verify.' : `[Demo Mode] OTP Code: ${otp}`,
+            email: user.email,
+            demoOtp: isSmtpConfigured ? undefined : otp
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
@@ -55,7 +58,13 @@ exports.login = async (req, res) => {
             await OTP.findOneAndDelete({ email: user.email, action: 'account_verification' });
             await OTP.create({ email: user.email, otp, action: 'account_verification' });
             await sendOTPEmail(user.email, otp, 'account_verification');
-            return res.status(403).json({ message: 'Account not verified', needsVerification: true, email: user.email });
+            const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+            return res.status(403).json({
+                message: isSmtpConfigured ? 'Account not verified. OTP sent to email.' : `Account not verified. [Demo Mode] OTP Code: ${otp}`,
+                needsVerification: true,
+                email: user.email,
+                demoOtp: isSmtpConfigured ? undefined : otp
+            });
         }
 
         res.json({

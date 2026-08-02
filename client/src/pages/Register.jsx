@@ -21,9 +21,14 @@ const Register = () => {
         setLoading(true);
         try {
             if (!showOTP) {
-                await register(name, email, password);
+                const res = await register(name, email, password);
                 setShowOTP(true);
-                setToast({ message: 'Account created! An OTP has been sent for verification.', type: 'info' });
+                if (res?.demoOtp) {
+                    setOtp(res.demoOtp);
+                    setToast({ message: `[Demo Mode] OTP Auto-Filled: ${res.demoOtp}`, type: 'success' });
+                } else {
+                    setToast({ message: res?.message || 'OTP sent to your email. Please verify.', type: 'info' });
+                }
             } else {
                 await verifyOTP(email, otp);
                 navigate('/dashboard');

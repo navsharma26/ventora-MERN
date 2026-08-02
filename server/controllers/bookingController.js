@@ -12,7 +12,13 @@ exports.sendBookingOTP = async (req, res) => {
         await OTP.findOneAndDelete({ email: req.user.email, action: 'event_booking' });
         await OTP.create({ email: req.user.email, otp, action: 'event_booking' });
         await sendOTPEmail(req.user.email, otp, 'event_booking');
-        res.json({ message: 'OTP sent successfully' });
+
+        const isSmtpConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+
+        res.json({
+            message: isSmtpConfigured ? 'OTP sent successfully to email' : `[Demo Mode] OTP Code: ${otp}`,
+            demoOtp: isSmtpConfigured ? undefined : otp
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error sending OTP', error: error.message });
     }
